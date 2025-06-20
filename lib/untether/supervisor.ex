@@ -1,8 +1,7 @@
 defmodule Untether.Supervisor do
-  # See https://hexdocs.pm/elixir/Application.html
-  # for more information on OTP Applications
-  @moduledoc false
-
+  @moduledoc """
+  Supervisor for Untether. This is the top level supervisor in the application.
+  """
   use Supervisor
 
   def start_link(config, opts) do
@@ -19,11 +18,13 @@ defmodule Untether.Supervisor do
     children =
       [
         Untether.Communicator.ClientSupervisor,
+        Untether.PubSub,
         Untether.Communicator.Listener,
         Untether.StateMachines.KeyBindingServer,
         Untether.StateMachines.TriggerServer,
         Untether.StateMachines.WindowServer,
-        Untether.StateMachines.DisplayServer
+        Untether.StateMachines.DisplayServer,
+        Untether.StateMachines.WorkspaceServer
       ]
       |> Enum.map(fn
         {module, opts} -> {module, opts}
@@ -31,24 +32,17 @@ defmodule Untether.Supervisor do
       end)
       |> Enum.map(fn {module, opts} -> {module, Keyword.put(opts, :config, config)} end)
       |> Enum.map(fn {module, opts} -> {module, Keyword.put(opts, :instance_id, instance_id)} end)
-      |> normalize_children(instance_id)
+      |> Enum.map(&normalize_child(&1, instance_id))
 
-    # See https://hexdocs.pm/elixir/Supervisor.html
-    # for other strategies and supported options
-    opts = [strategy: :one_for_one, name: name(Untether.Supervisor, instance_id)]
-    Supervisor.init(children, opts)
+    Supervisor.init(children,
+      strategy: :one_for_one
+    )
   end
 
-  def normalize_children(children, instance_id) do
-    Enum.map(children, fn {child_module, _args} = child ->
-      Supervisor.child_spec(
-        child,
-        id: Untether.Registry.generate_name(child_module, instance_id)
-      )
-    end)
-  end
-
-  defp name(name, supervisor_id) do
-    {name, supervisor_id}
+  defp normalize_child({child_module, _args} = child, instance_id) do
+    Supervisor.child_spec(
+      child,
+      id: Untether.Registry.generate_name(child_module, instance_id)
+    )
   end
 end

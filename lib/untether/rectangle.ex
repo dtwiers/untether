@@ -2,6 +2,13 @@ defmodule Untether.Rectangle do
   alias Untether.Margin
   alias Untether.Point
 
+  @type t :: %__MODULE__{
+          x: integer,
+          y: integer,
+          width: integer,
+          height: integer
+        }
+
   defstruct x: 0,
             y: 0,
             width: 0,

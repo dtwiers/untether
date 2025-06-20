@@ -1,5 +1,13 @@
 defprotocol Untether.Layout do
+  @spec render(
+          layout :: struct(),
+          display :: Untether.Display.t()
+        ) :: [Untether.LayoutResult.t()]
   def render(layout, display)
-  def handle_change(layout, changes, state, config)
-  def get_input_hooks(layout)
+
+  @spec change(
+          layout :: struct(),
+          event :: term()
+        ) :: struct()
+  def change(layout, event)
 end

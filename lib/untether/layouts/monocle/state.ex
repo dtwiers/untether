@@ -1,17 +1,37 @@
 defmodule Untether.Layouts.Monocle.State do
-  alias Untether.Display
-  alias Untether.Layouts.Monocle.Config
   alias Untether.Margin
+  alias Untether.LayoutUtils.WindowStack
 
-  defstruct normal_windows: [],
-            margin: nil,
-            usable_area: nil,
-            output: nil
+  @type t :: %__MODULE__{
+          stack: WindowStack.t(),
+          margin: Margin.t()
+        }
 
-  def new(%Config{} = config, display) do
+  defstruct stack: WindowStack.new(),
+            margin: nil
+
+  def new(%__MODULE__{
+        margin: margin,
+        stack: stack
+      })
+      when margin == nil do
     %__MODULE__{
-      margin: Margin.new(config.margin),
-      usable_area: Display.get_usable_display_area(display)
+      margin: margin || Margin.new(0),
+      stack: stack || WindowStack.new()
+    }
+  end
+
+  def new(%{} = attrs) do
+    %__MODULE__{
+      margin: attrs[:margin] || Margin.new(0),
+      stack: attrs[:stack] || WindowStack.new()
+    }
+  end
+
+  def from_config(%{} = config) do
+    %__MODULE__{
+      margin: Map.get(config, :margin, Margin.new(0)) |> Margin.new(),
+      stack: WindowStack.new()
     }
   end
 end
