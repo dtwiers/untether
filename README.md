@@ -1,5 +1,7 @@
 # Untether
 
+![Untether Logo](https://github.com/dtwiers/untether/blob/5b1fe31ab412803cbf200daada926eb011b9f7f5/Untether.png?raw=true, "Logo")
+
 Untether is a Wayland Compositor written and configured in Elixir. It uses Zig for the performance critical bits,
 but all of the logic takes advantage of the BEAM. It is intended to be as flexible as possible with your
 configuration being the entrypoint that calls the runtime, not the other way around (like xmonad).
