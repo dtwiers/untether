@@ -1,6 +1,17 @@
 # Untether
 
-**TODO: Add description**
+Untether is a Wayland Compositor written and configured in Elixir. It uses Zig for the performance critical bits,
+but all of the logic takes advantage of the BEAM. It is intended to be as flexible as possible with your
+configuration being the entrypoint that calls the runtime, not the other way around (like xmonad).
+
+This is intended to be a Wayland First compositor. I do not have any plans to backport this to X.
+
+I started writing this because there is no spiritual successor to XMonad or Qtile in Wayland, and I wanted
+a compositor that was both performant and configurable in much the same way. And...I'm an Elixir dev.
+
+For now, it's entirely non-functional and is in the early stages of development, but I'm working up a test
+suite, and once I get some sane defaults in place and a (barely) working Elixir side, I'll start on the
+Zig side.
 
 ## Installation
 

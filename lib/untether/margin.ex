@@ -1,4 +1,10 @@
 defmodule Untether.Margin do
+  @type t :: %__MODULE__{
+          left: integer,
+          right: integer,
+          top: integer,
+          bottom: integer
+        }
   defstruct left: 0,
             right: 0,
             top: 0,
