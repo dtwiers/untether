@@ -22,6 +22,7 @@ defimpl Untether.Layout, for: Untether.Layouts.Monocle do
   alias Untether.LayoutUtils.WindowStack
   alias Untether.Margin
   alias Untether.LayoutUtils.WindowStack
+  import Untether.LayoutUtils.WindowStack, only: [is_stack_action: 1]
 
   def render(%Untether.Layouts.Monocle{state: state} = _layout, _display) do
     case WindowStack.current_window(state.stack) do
@@ -30,56 +31,14 @@ defimpl Untether.Layout, for: Untether.Layouts.Monocle do
     end
   end
 
-  def change(layout, {:add_window, window}) do
-    map_stack(layout, &WindowStack.add_window(&1, window))
+  def change(layout, {:margin, margin}) do
+    update_state(layout, %WindowStack{layout.state.stack | margin: margin})
   end
 
-  def change(layout, {:remove_window, window}) do
-    map_stack(layout, &WindowStack.remove_window(&1, window))
-  end
-
-  def change(layout, {:focus_window, window}) do
-    map_stack(layout, &WindowStack.focus_window(&1, window))
-  end
-
-  def change(layout, {:demote_window, window}) do
-    position = WindowStack.position(layout.state.stack, window)
-    size = WindowStack.size(layout.state.stack)
-
-    if position == size - 1 do
-      layout
-    else
-      map_stack(
-        layout,
-        fn stack -> WindowStack.move_window(stack, window, 1) end
-      )
-    end
-  end
-
-  def change(layout, {:promote_window, window}) do
-    position = WindowStack.position(layout.state.stack, window)
-
-    if position == 1 do
-      layout
-    else
-      map_stack(
-        layout,
-        fn stack -> WindowStack.move_window(stack, window, -1) end
-      )
-    end
-  end
-
-  def change(layout, :focus_next) do
+  def change(layout, action) do
     map_stack(
       layout,
-      fn stack -> WindowStack.focus_next(stack) end
-    )
-  end
-
-  def change(layout, :focus_prev) do
-    map_stack(
-      layout,
-      fn stack -> WindowStack.focus_previous(stack) end
+      fn stack -> WindowStack.handle_change(stack, action) end
     )
   end
 

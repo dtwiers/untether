@@ -217,6 +217,70 @@ defmodule Untether.LayoutUtils.WindowStack do
     end
   end
 
+  def demote_window(%__MODULE__{} = window_stack, window) do
+    position = position(window_stack, window)
+    size = size(window_stack)
+
+    if position == size - 1 do
+      window_stack
+    else
+      move_window(window_stack, window, 1)
+    end
+  end
+
+  def promote_window(%__MODULE__{} = window_stack, window) do
+    position = position(window_stack, window)
+
+    if position == 1 do
+      window_stack
+    else
+      move_window(window_stack, window, -1)
+    end
+  end
+
+  defmacro is_stack_action(action) do
+    quote do
+      case unquote(action) do
+        atom when is_atom(action) ->
+          atom in [:focus_next, :focus_prev]
+
+        {id, _window} ->
+          id in [:add_window, :remove_window, :focus_window, :demote_window, :promote_window]
+
+        _ ->
+          false
+      end
+    end
+  end
+
+  def handle_change(%__MODULE__{} = window_stack, {:add_window, window}) do
+    add_window(window_stack, window)
+  end
+
+  def handle_change(%__MODULE__{} = window_stack, {:remove_window, window}) do
+    remove_window(window_stack, window)
+  end
+
+  def handle_change(%__MODULE__{} = window_stack, {:focus_window, window}) do
+    focus_window(window_stack, window)
+  end
+
+  def handle_change(%__MODULE__{} = window_stack, {:demote_window, window}) do
+    demote_window(window_stack, window)
+  end
+
+  def handle_change(%__MODULE__{} = window_stack, {:promote_window, window}) do
+    promote_window(window_stack, window)
+  end
+
+  def handle_change(%__MODULE__{} = window_stack, :focus_next) do
+    focus_next(window_stack)
+  end
+
+  def handle_change(%__MODULE__{} = window_stack, :focus_prev) do
+    focus_previous(window_stack)
+  end
+
   defp compare(a, b) do
     cond do
       a == b -> :eq
