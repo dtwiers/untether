@@ -238,21 +238,6 @@ defmodule Untether.LayoutUtils.WindowStack do
     end
   end
 
-  defmacro is_stack_action(action) do
-    quote do
-      case unquote(action) do
-        atom when is_atom(action) ->
-          atom in [:focus_next, :focus_prev]
-
-        {id, _window} ->
-          id in [:add_window, :remove_window, :focus_window, :demote_window, :promote_window]
-
-        _ ->
-          false
-      end
-    end
-  end
-
   def handle_change(%__MODULE__{} = window_stack, {:add_window, window}) do
     add_window(window_stack, window)
   end

@@ -21,8 +21,8 @@ end
 defimpl Untether.Layout, for: Untether.Layouts.Monocle do
   alias Untether.LayoutUtils.WindowStack
   alias Untether.Margin
-  alias Untether.LayoutUtils.WindowStack
-  import Untether.LayoutUtils.WindowStack, only: [is_stack_action: 1]
+  import Untether.LayoutUtils.WindowStack.Guards
+  alias Untether.Layouts.Monocle.State
 
   def render(%Untether.Layouts.Monocle{state: state} = _layout, _display) do
     case WindowStack.current_window(state.stack) do
@@ -32,10 +32,10 @@ defimpl Untether.Layout, for: Untether.Layouts.Monocle do
   end
 
   def change(layout, {:margin, margin}) do
-    update_state(layout, %WindowStack{layout.state.stack | margin: margin})
+    update_state(layout, margin: margin)
   end
 
-  def change(layout, action) do
+  def change(layout, action) when is_stack_action(action) do
     map_stack(
       layout,
       fn stack -> WindowStack.handle_change(stack, action) end
@@ -47,15 +47,17 @@ defimpl Untether.Layout, for: Untether.Layouts.Monocle do
   defp map_stack(%Untether.Layouts.Monocle{state: state} = layout, fun)
        when is_function(fun, 1) do
     new_stack = fun.(state.stack)
-    update_state(layout, new_stack)
+    update_state(layout, stack: new_stack)
   end
 
-  # Replace the stack inside the nested State struct keeping everything else
-  # untouched.
-  defp update_state(%Untether.Layouts.Monocle{state: state} = layout, %WindowStack{} = new_stack) do
+  defp update_state(%Untether.Layouts.Monocle{state: state} = layout, state_opts) do
     %Untether.Layouts.Monocle{
       layout
-      | state: %Untether.Layouts.Monocle.State{state | stack: new_stack}
+      | state:
+          state
+          |> Map.from_struct()
+          |> Map.merge(state_opts |> Enum.into(%{}))
+          |> State.new()
     }
   end
 end
